@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="UTF-8" />
+    <title>Options</title>
+    <link rel="stylesheet" href="../style.css" />
+  </head>
+  <body class="preload">
+    <h1>Options</h1>
+
+    <p id="status"></p>
+
+    <div class="options-section">
+      <div class="label-container">
+        <label for="apiKey">Pokémon TCG API Key</label>
+        <span class="tooltip-icon"
+          >?
+          <span class="tooltip-text">
+            This is optional and will give you higher rate limits. Get one for
+            free from https://dev.pokemontcg.io.
+          </span>
+        </span>
+      </div>
+      <input type="text" id="apiKey" placeholder="Enter API key" />
+    </div>
+
+    <div class="options-section">
+      <div class="label-container">
+        <label>Manage Collections</label>
+        <span class="tooltip-icon"
+          >?
+          <span class="tooltip-text">
+            Import collections from a file or export collections to a file.
+          </span>
+        </span>
+      </div>
+
+      <div class="row">
+        <label for="importFile" class="button fit-content"
+          >Import Collections</label
+        >
+        <input
+          type="file"
+          id="importFile"
+          accept=".json"
+          style="display: none"
+        />
+
+        <button id="exportCollections" class="fit-content">
+          Export Collections
+        </button>
+      </div>
+    </div>
+
+    <div class="options-section">
+      <div class="label-container">
+        <label>Search Sites</label>
+        <span class="tooltip-icon">
+          ?
+          <span class="tooltip-text">
+            Add websites to search by artist. Get the search URL by copying the
+            URL up to the search term. For example, copy everything before
+            “wailord” in: https://www.ebay.ca/sch/i.html?_nkw=wailord+162
+          </span>
+        </span>
+      </div>
+
+      <div id="siteList" class="column-controls"></div>
+
+      <div class="row">
+        <input type="text" id="newSiteName" placeholder="Enter site name" />
+        <input
+          type="text"
+          id="newSiteUrl"
+          placeholder="Enter search URL prefix"
+        />
+        <button id="addSiteBtn">Add Site</button>
+      </div>
+    </div>
+
+    <script type="module" src="../js/options.js"></script>
+  </body>
+</html>

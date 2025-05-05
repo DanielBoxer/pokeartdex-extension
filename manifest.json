@@ -1,0 +1,24 @@
+{
+    "manifest_version": 3,
+    "name": "PokeArtDex",
+    "version": "1.0",
+    "permissions": [
+        "storage"
+    ],
+    "action": {
+        "default_popup": "html/popup.html",
+        "default_title": "PokeArtDex"
+    },
+    "options_ui": {
+        "page": "html/options.html"
+    },
+    "icons": {
+        "512": "icons/icon.svg"
+    },
+    "browser_specific_settings": {
+        "gecko": {
+            "id": "{bf5d6795-8427-4434-8b2d-30d9a8080ef5}",
+            "strict_min_version": "109.0"
+        }
+    }
+}

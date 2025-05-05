@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="UTF-8" />
+    <link rel="stylesheet" href="../style.css" />
+  </head>
+  <body>
+    <div id="artistSearchSection">
+      <h2>Artist Search</h2>
+      <div class="search-bar">
+        <input type="text" id="artist" placeholder="Card artist..." />
+        <button id="loadArtist">
+          <img
+            src="../icons/search.svg"
+            class="filter-white"
+            width="24"
+            height="24"
+          />
+        </button>
+      </div>
+    </div>
+
+    <h2>Your Card Collection</h2>
+
+    <div class="row controls-row">
+      <select id="savedArtists">
+        <option value="">Unsaved collection</option>
+      </select>
+      <button id="saveCollection">
+        <img
+          src="../icons/save.svg"
+          class="filter-white"
+          width="24"
+          height="24"
+        />
+      </button>
+      <button id="deleteCollection">
+        <img
+          src="../icons/trash.svg"
+          class="filter-white"
+          width="24"
+          height="24"
+        />
+      </button>
+    </div>
+
+    <div class="summary">
+      <p id="ownedProgress">Owned: 0 / 0</p>
+      <p id="totalValue">Estimated Value: $0.00</p>
+    </div>
+
+    <div id="externalSearchControls" data-layout="row"></div>
+
+    <div class="card-controls-row row">
+      <div id="lastUpdated" class="last-updated">Last updated: N/A</div>
+      <div class="card-buttons">
+        <button id="refreshCollection" class="button small-button">
+          Refresh Data
+        </button>
+        <button id="ignoreAllBtn" class="button small-button">
+          Toggle Ignore All
+        </button>
+      </div>
+    </div>
+
+    <p id="feedback">No recent search.</p>
+
+    <div class="row sort-group-row">
+      <label for="sortBy">Sort by:</label>
+      <select id="sortBy">
+        <option value="name-asc">Name (A-Z)</option>
+        <option value="name-desc">Name (Z-A)</option>
+        <option value="price-low">Price (Low to High)</option>
+        <option value="price-high">Price (High to Low)</option>
+        <option value="date-new">Date (Newest)</option>
+        <option value="date-old">Date (Oldest)</option>
+      </select>
+
+      <label class="group-toggle">
+        <input type="checkbox" id="groupBySet" checked />
+        Group by Set
+      </label>
+    </div>
+
+    <ul id="cardList"></ul>
+
+    <script type="module" src="../js/cards.js"></script>
+  </body>
+</html>
