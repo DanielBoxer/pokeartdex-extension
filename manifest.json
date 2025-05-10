@@ -2,6 +2,7 @@
     "manifest_version": 3,
     "name": "PokeArtDex",
     "version": "1.0",
+    "description": "A browser extension for collecting Pokemon cards by specific artists. It also allows you to search by artist on sites that don't support it.",
     "permissions": [
         "storage"
     ],
