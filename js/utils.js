@@ -1,6 +1,6 @@
 export function formatDate(iso) {
   const date = new Date(iso);
-  return date.toLocaleString();
+  return date.toLocaleDateString();
 }
 
 export function groupBy(array, fn) {
@@ -15,12 +15,11 @@ export function groupBy(array, fn) {
 export function calculateOwnedValue(cards, ownedIds) {
   return cards.reduce((sum, card) => {
     if (!ownedIds.includes(card.id)) return sum;
-    const price = card.tcgplayer?.prices?.holofoil?.mid ?? 0;
-    return sum + price;
+    return sum + getMarketPrice(card);
   }, 0);
 }
 
-function getMarketPrice(card) {
+export function getMarketPrice(card) {
   const prices = card.tcgplayer?.prices || {};
   for (const p of Object.values(prices)) {
     if (p.market || p.mid || p.low || p.high) {
@@ -28,6 +27,10 @@ function getMarketPrice(card) {
     }
   }
   return 0;
+}
+
+export function totalPrice(cards) {
+  return cards.reduce((sum, c) => sum + getMarketPrice(c), 0);
 }
 
 export const sortOptions = {

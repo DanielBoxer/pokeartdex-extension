@@ -166,6 +166,13 @@ elements.ignoreAllBtn?.addEventListener("click", () => {
   });
 });
 
+elements.cardList.addEventListener("change", (e) => {
+  if (e.target.matches("input[data-id]")) {
+    const owned = getOwnedIdsFromDOM();
+    updateProgressAndValue(currentCards, owned);
+  }
+});
+
 elements.refreshBtn?.addEventListener("click", async () => {
   updateFeedback("Refreshing card data...");
   const cards = await getCardsByArtist(currentArtist);

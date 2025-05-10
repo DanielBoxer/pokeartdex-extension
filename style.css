@@ -242,7 +242,12 @@ input[type="checkbox"].ignore-box {
 }
 
 .space-top {
-  margin-top: 15px;
+  margin-top: 10px;
+}
+
+.card-price {
+  font-size: 0.85em;
+  color: var(--info-color);
 }
 
 #siteList input {

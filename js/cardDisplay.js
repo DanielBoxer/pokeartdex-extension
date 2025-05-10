@@ -1,5 +1,12 @@
 import { buildSearchUrl } from "./search.js";
-import { formatDate, groupBy, calculateOwnedValue } from "./utils.js";
+import {
+  formatDate,
+  groupBy,
+  calculateOwnedValue,
+  totalPrice,
+  sortOptions,
+  getMarketPrice,
+} from "./utils.js";
 
 export function getUIElements() {
   return {
@@ -58,6 +65,76 @@ export function getOwnedIdsFromDOM() {
   );
 }
 
+function renderRecentCards(cards, ownedIds, ignoredIds, container, siteMap) {
+  if (cards.length === 0) return;
+
+  const header = document.createElement("h4");
+  header.textContent = "Recently Searched";
+  container.appendChild(header);
+
+  cards.forEach((card) =>
+    renderCardItem(card, ownedIds, ignoredIds, container, siteMap)
+  );
+}
+
+function renderGroupedCards(
+  cards,
+  ownedIds,
+  ignoredIds,
+  container,
+  siteMap,
+  sortKey,
+  sortFn
+) {
+  const grouped = groupBySet(cards);
+
+  const sortedGroups = Object.entries(grouped).sort((a, b) => {
+    if (!sortFn) return a[0].localeCompare(b[0]);
+
+    if (sortKey === "price-high" || sortKey === "price-low") {
+      const valueA = totalPrice(a[1]);
+      const valueB = totalPrice(b[1]);
+      return sortKey === "price-high" ? valueB - valueA : valueA - valueB;
+    }
+
+    if (sortKey === "name-asc") return a[0].localeCompare(b[0]);
+    if (sortKey === "name-desc") return b[0].localeCompare(a[0]);
+
+    const cardA = a[1][0];
+    const cardB = b[1][0];
+    return sortFn(cardA, cardB);
+  });
+
+  sortedGroups.forEach(([setName, group]) => {
+    const header = document.createElement("h4");
+
+    if (sortKey?.startsWith("price")) {
+      const price = totalPrice(group);
+      header.textContent = `${setName} - $${price.toFixed(2)}`;
+    } else {
+      const date = formatDate(group[0]?.set?.releaseDate) || "Unknown";
+      header.textContent = `${setName} - ${date}`;
+    }
+
+    container.appendChild(header);
+
+    const cardSortFn = sortFn || ((a, b) => a.name.localeCompare(b.name));
+
+    group
+      .slice()
+      .sort(cardSortFn)
+      .forEach((card) =>
+        renderCardItem(card, ownedIds, ignoredIds, container, siteMap)
+      );
+  });
+}
+
+function renderFlatCards(cards, ownedIds, ignoredIds, container, siteMap) {
+  cards.forEach((card) =>
+    renderCardItem(card, ownedIds, ignoredIds, container, siteMap)
+  );
+}
+
 export function renderCardList({
   cards,
   ownedIds,
@@ -69,42 +146,38 @@ export function renderCardList({
   groupBy = true,
 }) {
   container.innerHTML = "";
-  const lastUpdatedEl = document.getElementById("lastUpdated");
-  if (lastUpdatedEl) {
-    lastUpdatedEl.textContent = `Last updated: ${
+
+  const { sortDropdown, lastUpdated } = getUIElements();
+  const sortKey = sortDropdown?.value;
+  const sortFn = sortOptions[sortKey];
+
+  if (lastUpdated) {
+    lastUpdated.textContent = `Last updated: ${
       updatedAt ? formatDate(updatedAt) : "N/A"
     }`;
   }
 
   const remaining = cards.filter((c) => !lastSearchedCards.includes(c));
-
-  if (lastSearchedCards.length > 0) {
-    const header = document.createElement("h4");
-    header.textContent = "🔍 Recently Searched";
-    container.appendChild(header);
-    lastSearchedCards.forEach((card) =>
-      renderCardItem(card, ownedIds, ignoredIds, container, siteMap)
-    );
-  }
+  renderRecentCards(
+    lastSearchedCards,
+    ownedIds,
+    ignoredIds,
+    container,
+    siteMap
+  );
 
   if (groupBy) {
-    const grouped = groupBySet(remaining);
-    for (const [setName, group] of Object.entries(grouped)) {
-      const header = document.createElement("h4");
-      header.textContent = `${setName} — ${
-        formatDate(group[0]?.set?.releaseDate) || "Unknown"
-      }`;
-      container.appendChild(header);
-      group
-        .sort((a, b) => a.name.localeCompare(b.name))
-        .forEach((card) =>
-          renderCardItem(card, ownedIds, ignoredIds, container, siteMap)
-        );
-    }
-  } else {
-    remaining.forEach((card) =>
-      renderCardItem(card, ownedIds, ignoredIds, container, siteMap)
+    renderGroupedCards(
+      remaining,
+      ownedIds,
+      ignoredIds,
+      container,
+      siteMap,
+      sortKey,
+      sortFn
     );
+  } else {
+    renderFlatCards(remaining, ownedIds, ignoredIds, container, siteMap);
   }
 }
 
@@ -134,6 +207,7 @@ function renderCardItem(card, ownedIds, ignoredIds, container, siteMap) {
   img.src = card.images.small;
   img.width = 60;
   img.height = 84;
+  img.className = "zoomable";
 
   const details = document.createElement("div");
   details.className = "card-details";
@@ -143,10 +217,10 @@ function renderCardItem(card, ownedIds, ignoredIds, container, siteMap) {
 
   const number = document.createElement("span");
   number.className = "card-number";
-  number.textContent = `#${card.number}/${card.set?.printedTotal ?? "?"}`;
+  number.textContent = ` - #${card.number}/${card.set?.printedTotal ?? "?"}`;
 
   const searchBtn = document.createElement("button");
-  searchBtn.className = "card-search-btn";
+  searchBtn.className = "space-top";
   searchBtn.textContent = "Search";
 
   ignoreBox.addEventListener("change", (e) => {
@@ -159,9 +233,17 @@ function renderCardItem(card, ownedIds, ignoredIds, container, siteMap) {
     if (url) chrome.tabs.create({ url });
   });
 
+  const price = getMarketPrice(card);
+
+  const priceEl = document.createElement("span");
+  priceEl.className = "card-price";
+  priceEl.textContent = ` - $${price.toFixed(2)}`;
+
   details.appendChild(title);
-  details.appendChild(document.createElement("br"));
+  details.appendChild(document.createTextNode(" "));
   details.appendChild(number);
+  details.appendChild(priceEl);
+  details.appendChild(document.createElement("br"));
   details.appendChild(searchBtn);
 
   row.appendChild(ownedBox);

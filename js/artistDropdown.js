@@ -15,7 +15,7 @@ export function setupArtistDropdown(selectElement, options = {}) {
   function populate() {
     loadCollections().then((collections) => {
       selectElement.innerHTML = "";
-      selectElement.appendChild(renderOption("", "Unsaved collection"));
+      selectElement.appendChild(renderOption("", "New Collection"));
 
       const artists = Object.keys(collections);
       artists.forEach((artist) => {
