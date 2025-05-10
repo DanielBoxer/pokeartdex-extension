@@ -12,10 +12,9 @@ export function setupArtistDropdown(selectElement, options = {}) {
     return opt;
   }
 
-  function populate() {
+  function populate(selectAfter = "") {
     loadCollections().then((collections) => {
       selectElement.innerHTML = "";
-      selectElement.appendChild(renderOption("", "New Collection"));
 
       const artists = Object.keys(collections);
       artists.forEach((artist) => {
@@ -24,7 +23,8 @@ export function setupArtistDropdown(selectElement, options = {}) {
       });
 
       if (artists.length > 0) {
-        selectElement.value = artists[0];
+        const selected = selectAfter || artists[0];
+        selectElement.value = selected;
       }
 
       options.onLoaded?.(artists);
@@ -37,5 +37,5 @@ export function setupArtistDropdown(selectElement, options = {}) {
 
   populate();
 
-  return { getSelectedArtist };
+  return { getSelectedArtist, refresh: populate };
 }

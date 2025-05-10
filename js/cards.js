@@ -13,7 +13,7 @@ import {
   clearCollectionDisplay,
   updateProgressAndValue,
 } from "./cardDisplay.js";
-import { sortOptions } from "./utils.js";
+import { sortOptions, capitalizeName } from "./utils.js";
 import { createSearchControls } from "./searchControls.js";
 import { setupArtistDropdown } from "./artistDropdown.js";
 
@@ -39,10 +39,33 @@ function renderCurrentCards(ownedIds = []) {
   });
 }
 
-function getIgnoredIdsFromDOM() {
-  return [
-    ...elements.cardList.querySelectorAll("input[data-ignore-id]:checked"),
-  ].map((cb) => cb.dataset.ignoreId);
+async function saveCurrentState(owned) {
+  updatedAt = new Date().toISOString();
+  await saveCollection(currentArtist, {
+    cards: currentCards,
+    owned,
+    ignored: [...ignoredIds],
+    updatedAt,
+  });
+}
+
+function showSearchUI() {
+  document.getElementById("controlsWrapper").style.display = "none";
+  document.getElementById("artistSearchSection").style.display = "block";
+  elements.artistInput.value = "";
+  elements.artistSelect.selectedIndex = 0;
+  clearCollectionDisplay(elements);
+}
+
+function loadAndDisplayCollection(artist, entry) {
+  currentArtist = artist;
+  currentCards = entry.cards || [];
+  ignoredIds = new Set(entry.ignored || []);
+  updatedAt = entry.updatedAt || "";
+
+  renderCurrentCards(entry.owned || []);
+  updateProgressAndValue(currentCards, entry.owned || []);
+  updateFeedback(`Loaded ${currentCards.length} cards for ${artist}.`);
 }
 
 function initArtistDropdown() {
@@ -60,50 +83,64 @@ function initArtistDropdown() {
       loadCollectionFromStorage(artist);
     },
     onLoaded: (artistNames) => {
-      if (artistNames.length > 0) {
-        const first = artistNames[0];
-        elements.artistInput.value = first;
-        elements.artistSelect.value = first;
-        updateArtistSearchVisibility();
-        loadCollectionFromStorage(first);
+      const collectionControls = document.getElementById("controlsWrapper");
+
+      if (artistNames.length === 0) {
+        collectionControls.style.display = "none";
+      } else {
+        collectionControls.style.display = "block";
+
+        const selected = elements.artistSelect.value;
+        if (selected) {
+          elements.artistInput.value = selected;
+          loadCollectionFromStorage(selected);
+        }
       }
+
+      updateArtistSearchVisibility();
     },
   });
 }
 
-const { getSelectedArtist } = initArtistDropdown();
+const artistDropdown = initArtistDropdown();
+const getSelectedArtist = artistDropdown.getSelectedArtist;
 
 function loadCollectionFromStorage(artist) {
   loadCollections().then((collections) => {
     const entry = collections[artist];
     if (!entry) return updateFeedback(`No saved data for "${artist}".`);
-
-    currentArtist = artist;
-    currentCards = entry.cards || [];
-    ignoredIds = new Set(entry.ignored || []);
-    updatedAt = entry.updatedAt || "";
-
-    renderCurrentCards(entry.owned || []);
-    updateProgressAndValue(currentCards, entry.owned || []);
-    updateFeedback(`Loaded ${currentCards.length} cards for ${artist}.`);
+    loadAndDisplayCollection(artist, entry);
   });
 }
 
 elements.loadBtn.addEventListener("click", async () => {
-  const artist = elements.artistInput.value.trim();
+  let artist = elements.artistInput.value.trim();
   if (!artist) return;
+
+  artist = capitalizeName(artist);
+  elements.artistInput.value = artist;
+
   updateFeedback(`Searching cards for ${artist}...`);
 
-  const cards = await getCardsByArtist(artist);
+  currentCards = await getCardsByArtist(artist);
   currentArtist = artist;
-  currentCards = cards;
   ignoredIds = new Set();
-  updatedAt = "";
+  updatedAt = new Date().toISOString();
   elements.artistSelect.selectedIndex = 0;
 
+  await saveCollection(artist, {
+    cards: currentCards,
+    owned: [],
+    ignored: [],
+    updatedAt,
+  });
+
+  artistDropdown.refresh(artist);
   renderCurrentCards([]);
-  updateProgressAndValue(cards, []);
-  updateFeedback(`Loaded ${cards.length} cards from API for "${artist}".`);
+  updateProgressAndValue(currentCards, []);
+  updateFeedback(
+    `Loaded and saved ${currentCards.length} cards for "${artist}".`
+  );
 });
 
 elements.sortDropdown.addEventListener("change", () => {
@@ -116,46 +153,41 @@ elements.groupBySet.addEventListener("change", () => {
   renderCurrentCards(getOwnedIdsFromDOM());
 });
 
-elements.saveBtn.addEventListener("click", () => {
-  const owned = getOwnedIdsFromDOM();
-  const ignored = getIgnoredIdsFromDOM();
+elements.deleteBtn?.addEventListener("click", async () => {
   const artist = elements.artistInput.value.trim();
+  if (!artist) return;
 
-  if (
-    artist &&
-    confirm(
-      `Save collection for "${artist}" with ${owned.length} owned and ${ignored.length} ignored cards?`
-    )
-  ) {
-    saveCollection(artist, {
-      cards: currentCards,
-      owned,
-      ignored,
-    }).then(() => {
-      updateFeedback(`Saved collection for "${artist}".`);
-      updateProgressAndValue(currentCards, owned);
+  if (confirm(`Delete saved collection for "${artist}"?`)) {
+    await deleteCollection(artist);
+
+    clearCollectionDisplay(elements);
+    updateFeedback(`Deleted collection for "${artist}".`);
+
+    const collections = await loadCollections();
+    const remaining = Object.keys(collections);
+
+    if (remaining.length === 0) {
+      showSearchUI();
+    } else {
       initArtistDropdown();
-    });
+    }
   }
 });
 
-elements.deleteBtn?.addEventListener("click", () => {
-  const artist = elements.artistInput.value.trim();
-  if (artist && confirm(`Delete saved collection for "${artist}"?`)) {
-    deleteCollection(artist).then(() => {
-      clearCollectionDisplay(elements);
-      updateFeedback(`Deleted collection for "${artist}".`);
-    });
-  }
+elements.newCollectionBtn?.addEventListener("click", () => {
+  showSearchUI();
+  updateFeedback("");
 });
 
-elements.ignoreAllBtn?.addEventListener("click", () => {
+function toggleIgnoreAll() {
   const all = elements.cardList.querySelectorAll("input[data-ignore-id]");
   const toggle = ![...all].every((cb) => cb.checked);
+
   all.forEach((cb) => {
     cb.checked = toggle;
     const id = cb.dataset.ignoreId;
     const li = cb.closest("li");
+
     if (toggle) {
       ignoredIds.add(id);
       if (li) li.style.opacity = "0.5";
@@ -164,31 +196,30 @@ elements.ignoreAllBtn?.addEventListener("click", () => {
       if (li) li.style.opacity = "1";
     }
   });
-});
+
+  saveCurrentState(getOwnedIdsFromDOM());
+}
+
+elements.ignoreAllBtn?.addEventListener("click", toggleIgnoreAll);
 
 elements.cardList.addEventListener("change", (e) => {
   if (e.target.matches("input[data-id]")) {
     const owned = getOwnedIdsFromDOM();
     updateProgressAndValue(currentCards, owned);
+    saveCurrentState(owned);
   }
 });
 
 elements.refreshBtn?.addEventListener("click", async () => {
   updateFeedback("Refreshing card data...");
-  const cards = await getCardsByArtist(currentArtist);
+
+  currentCards = await getCardsByArtist(currentArtist);
   const owned = getOwnedIdsFromDOM();
-  const ignored = [...ignoredIds];
 
-  await saveCollection(currentArtist, {
-    cards,
-    owned,
-    ignored,
-  });
+  await saveCurrentState(owned);
 
-  updatedAt = new Date().toISOString();
-  currentCards = cards;
   renderCurrentCards(owned);
-  updateProgressAndValue(cards, owned);
+  updateProgressAndValue(currentCards, owned);
   updateFeedback("Collection refreshed.");
 });
 

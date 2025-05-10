@@ -29,6 +29,17 @@ export function getMarketPrice(card) {
   return 0;
 }
 
+export function capitalizeName(name) {
+  return name
+    .split(" ")
+    .map((word) =>
+      word.length > 1
+        ? word[0].toUpperCase() + word.slice(1).toLowerCase()
+        : word.toUpperCase()
+    )
+    .join(" ");
+}
+
 export function totalPrice(cards) {
   return cards.reduce((sum, c) => sum + getMarketPrice(c), 0);
 }

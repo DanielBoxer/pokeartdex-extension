@@ -20,69 +20,69 @@
       </div>
     </div>
 
-    <h2>Your Card Collection</h2>
+    <p id="feedback"></p>
 
-    <div class="row controls-row">
-      <select id="savedArtists">
-        <option value="">New Collection</option>
-      </select>
-      <button id="saveCollection">
-        <img
-          src="../icons/save.svg"
-          class="filter-white"
-          width="24"
-          height="24"
-        />
-      </button>
-      <button id="deleteCollection">
-        <img
-          src="../icons/trash.svg"
-          class="filter-white"
-          width="24"
-          height="24"
-        />
-      </button>
-    </div>
+    <div id="controlsWrapper">
+      <h2>Your Card Collection</h2>
 
-    <div class="summary">
-      <p id="ownedProgress">Owned: 0 / 0</p>
-      <p id="totalValue">Estimated Value: $0.00</p>
-    </div>
-
-    <div id="externalSearchControls" data-layout="row"></div>
-
-    <div class="card-controls-row row">
-      <div id="lastUpdated" class="last-updated">Last updated: N/A</div>
-      <div class="card-buttons">
-        <button id="refreshCollection" class="button small-button">
-          Refresh Data
+      <div class="row controls-row">
+        <select id="savedArtists"></select>
+        <button id="newCollectionBtn">
+          <img
+            src="../icons/plus.svg"
+            class="filter-white"
+            width="24"
+            height="24"
+          />
         </button>
-        <button id="ignoreAllBtn" class="button small-button">
-          Toggle Ignore All
+        <button id="deleteCollection">
+          <img
+            src="../icons/trash.svg"
+            class="filter-white"
+            width="24"
+            height="24"
+          />
         </button>
       </div>
+
+      <div class="summary">
+        <p id="ownedProgress">Owned: 0 / 0</p>
+        <p id="totalValue">Estimated Value: $0.00</p>
+      </div>
+
+      <div id="externalSearchControls" data-layout="row"></div>
+
+      <div class="card-controls-row row">
+        <div id="lastUpdated" class="last-updated">Last updated: N/A</div>
+        <div class="card-buttons">
+          <button id="refreshCollection" class="button small-button">
+            Refresh Data
+          </button>
+          <button id="ignoreAllBtn" class="button small-button">
+            Toggle Ignore All
+          </button>
+        </div>
+      </div>
+
+      <div class="row sort-group-row">
+        <label for="sortBy">Sort by:</label>
+        <select id="sortBy">
+          <option value="name-asc">Name (A-Z)</option>
+          <option value="name-desc">Name (Z-A)</option>
+          <option value="price-low">Price (Low to High)</option>
+          <option value="price-high">Price (High to Low)</option>
+          <option value="date-new">Date (Newest)</option>
+          <option value="date-old">Date (Oldest)</option>
+        </select>
+
+        <label class="group-toggle">
+          <input type="checkbox" id="groupBySet" checked />
+          Group by Set
+        </label>
+      </div>
+
+      <ul id="cardList"></ul>
     </div>
-
-    <p id="feedback">No recent search.</p>
-
-    <div class="row sort-group-row">
-      <label for="sortBy">Sort by:</label>
-      <select id="sortBy">
-        <option value="name-asc">Name (A-Z)</option>
-        <option value="name-desc">Name (Z-A)</option>
-        <option value="price-low">Price (Low to High)</option>
-        <option value="price-high">Price (High to Low)</option>
-        <option value="date-new">Date (Newest)</option>
-        <option value="date-old">Date (Oldest)</option>
-      </select>
-
-      <label class="group-toggle">
-        <input type="checkbox" id="groupBySet" checked />
-        Group by Set
-      </label>
-    </div>
-
-    <ul id="cardList"></ul>
 
     <script type="module" src="../js/cards.js"></script>
   </body>

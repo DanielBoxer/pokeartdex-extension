@@ -127,7 +127,7 @@ li img {
 }
 
 .zoomable:hover {
-  transform: scale(2);
+  transform: scale(3);
   z-index: 10;
   position: relative;
 }
@@ -248,6 +248,10 @@ input[type="checkbox"].ignore-box {
 .card-price {
   font-size: 0.85em;
   color: var(--info-color);
+}
+
+#controlsWrapper {
+  display: none;
 }
 
 #siteList input {
