@@ -57,12 +57,7 @@ async function handleSearch({ artist, siteKey, maxTabs, collections }) {
     cards: cardsToSearch,
   });
 
-  const combined = [
-    ...openedCards,
-    ...currentCards.filter((c) => !openedCards.some((s) => s.id === c.id)),
-  ];
-
-  return { cards: combined, ownedIds: owned };
+  return { cards: openedCards };
 }
 
 export async function createSearchControls(container, options = {}) {

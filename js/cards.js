@@ -236,9 +236,9 @@ elements.refreshBtn?.addEventListener("click", async () => {
 
 createSearchControls(elements.searchControls, {
   artist: getSelectedArtist,
-  onSearchComplete: ({ cards, ownedIds }) => {
-    lastSearchedCards = cards.slice(0, ownedIds.length);
-    renderCurrentCards(ownedIds);
+  onSearchComplete: ({ cards }) => {
+    lastSearchedCards = cards;
+    renderCurrentCards(getOwnedIdsFromDOM());
   },
 });
 
