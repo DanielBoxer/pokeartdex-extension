@@ -50,11 +50,17 @@ async function saveCurrentState(owned) {
 }
 
 function showSearchUI() {
-  document.getElementById("controlsWrapper").style.display = "none";
-  document.getElementById("artistSearchSection").style.display = "block";
+  elements.controlsWrapper.style.display = "none";
+  elements.artistSearchSection.style.display = "block";
   elements.artistInput.value = "";
   elements.artistSelect.selectedIndex = 0;
   clearCollectionDisplay(elements);
+}
+
+function showCollectionUI() {
+  elements.artistSearchSection.style.display = "none";
+  elements.controlsWrapper.style.display = "block";
+  updateFeedback("");
 }
 
 function loadAndDisplayCollection(artist, entry) {
@@ -83,7 +89,7 @@ function initArtistDropdown() {
       loadCollectionFromStorage(artist);
     },
     onLoaded: (artistNames) => {
-      const collectionControls = document.getElementById("controlsWrapper");
+      const collectionControls = elements.controlsWrapper;
 
       if (artistNames.length === 0) {
         collectionControls.style.display = "none";
@@ -210,6 +216,11 @@ elements.cardList.addEventListener("change", (e) => {
   }
 });
 
+elements.backBtn?.addEventListener("click", () => {
+  showCollectionUI();
+  initArtistDropdown();
+});
+
 elements.refreshBtn?.addEventListener("click", async () => {
   updateFeedback("Refreshing card data...");
 
@@ -223,7 +234,7 @@ elements.refreshBtn?.addEventListener("click", async () => {
   updateFeedback("Collection refreshed.");
 });
 
-createSearchControls(document.getElementById("externalSearchControls"), {
+createSearchControls(elements.searchControls, {
   artist: getSelectedArtist,
   onSearchComplete: ({ cards, ownedIds }) => {
     lastSearchedCards = cards.slice(0, ownedIds.length);
@@ -232,8 +243,8 @@ createSearchControls(document.getElementById("externalSearchControls"), {
 });
 
 function updateArtistSearchVisibility() {
-  const section = document.getElementById("artistSearchSection");
-  section.style.display = elements.artistSelect.value === "" ? "block" : "none";
+  elements.artistSearchSection.style.display =
+    elements.artistSelect.value === "" ? "block" : "none";
 }
 
 elements.artistSelect.addEventListener("change", updateArtistSearchVisibility);

@@ -16,14 +16,19 @@ export function getUIElements() {
     progress: document.getElementById("ownedProgress"),
     totalValue: document.getElementById("totalValue"),
     artistSelect: document.getElementById("savedArtists"),
-    loadBtn: document.getElementById("loadArtist"),
-    deleteBtn: document.getElementById("deleteCollection"),
-    newCollectionBtn: document.getElementById("newCollectionBtn"),
     lastUpdated: document.getElementById("lastUpdated"),
-    refreshBtn: document.getElementById("refreshCollection"),
-    ignoreAllBtn: document.getElementById("ignoreAllBtn"),
     sortDropdown: document.getElementById("sortBy"),
     groupBySet: document.getElementById("groupBySet"),
+    searchControls: document.getElementById("externalSearchControls"),
+    controlsWrapper: document.getElementById("controlsWrapper"),
+    artistSearchSection: document.getElementById("artistSearchSection"),
+    // buttons
+    loadBtn: document.getElementById("loadArtist"),
+    deleteBtn: document.getElementById("deleteCollection"),
+    refreshBtn: document.getElementById("refreshCollection"),
+    newCollectionBtn: document.getElementById("newCollectionBtn"),
+    ignoreAllBtn: document.getElementById("ignoreAllBtn"),
+    backBtn: document.getElementById("backButton"),
   };
 }
 
