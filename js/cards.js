@@ -25,20 +25,22 @@ let ownedIds = new Set();
 
 let ignoredIds = new Set();
 let updatedAt = "";
-let lastSearchedCards = [];
+const recentSearchesByArtist = new Map();
 
 export function clearRecentCards() {
-  lastSearchedCards = [];
+  recentSearchesByArtist.delete(currentArtist);
   renderCurrentCards();
 }
 
 function renderCurrentCards() {
+  const recentCards = recentSearchesByArtist.get(currentArtist) || [];
+
   renderCardList({
     cards: currentCards,
     ownedIds,
     ignoredIds,
     container: elements.cardList,
-    lastSearchedCards,
+    lastSearchedCards: recentCards,
     updatedAt,
     siteMap,
     groupBy: elements.groupBySet?.checked,
@@ -249,7 +251,7 @@ elements.refreshBtn?.addEventListener("click", async () => {
 createSearchControls(elements.searchControls, {
   artist: getSelectedArtist,
   onSearchComplete: ({ cards }) => {
-    lastSearchedCards = cards;
+    recentSearchesByArtist.set(currentArtist, cards);
     renderCurrentCards();
   },
 });
