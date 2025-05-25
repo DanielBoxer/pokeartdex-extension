@@ -9,7 +9,6 @@ import {
   updateFeedback,
   getUIElements,
   renderCardList,
-  getOwnedIdsFromDOM,
   clearCollectionDisplay,
   updateProgressAndValue,
 } from "./cardDisplay.js";
@@ -22,11 +21,18 @@ const elements = getUIElements();
 
 let currentCards = [];
 let currentArtist = "";
+let ownedIds = new Set();
+
 let ignoredIds = new Set();
 let updatedAt = "";
 let lastSearchedCards = [];
 
-function renderCurrentCards(ownedIds = []) {
+export function clearRecentCards() {
+  lastSearchedCards = [];
+  renderCurrentCards();
+}
+
+function renderCurrentCards() {
   renderCardList({
     cards: currentCards,
     ownedIds,
@@ -39,11 +45,11 @@ function renderCurrentCards(ownedIds = []) {
   });
 }
 
-async function saveCurrentState(owned) {
+async function saveCurrentState() {
   updatedAt = new Date().toISOString();
   await saveCollection(currentArtist, {
     cards: currentCards,
-    owned,
+    owned: [...ownedIds],
     ignored: [...ignoredIds],
     updatedAt,
   });
@@ -69,8 +75,10 @@ function loadAndDisplayCollection(artist, entry) {
   ignoredIds = new Set(entry.ignored || []);
   updatedAt = entry.updatedAt || "";
 
-  renderCurrentCards(entry.owned || []);
-  updateProgressAndValue(currentCards, entry.owned || []);
+  ownedIds = new Set(entry.owned || []);
+
+  renderCurrentCards();
+  updateProgressAndValue(currentCards, ownedIds);
   updateFeedback(`Loaded ${currentCards.length} cards for ${artist}.`);
 }
 
@@ -142,8 +150,8 @@ elements.loadBtn.addEventListener("click", async () => {
   });
 
   artistDropdown.refresh(artist);
-  renderCurrentCards([]);
-  updateProgressAndValue(currentCards, []);
+  renderCurrentCards();
+  updateProgressAndValue(currentCards, ownedIds);
   updateFeedback(
     `Loaded and saved ${currentCards.length} cards for "${artist}".`
   );
@@ -152,11 +160,11 @@ elements.loadBtn.addEventListener("click", async () => {
 elements.sortDropdown.addEventListener("change", () => {
   const sortFn = sortOptions[elements.sortDropdown.value];
   if (sortFn) currentCards.sort(sortFn);
-  renderCurrentCards(getOwnedIdsFromDOM());
+  renderCurrentCards();
 });
 
 elements.groupBySet.addEventListener("change", () => {
-  renderCurrentCards(getOwnedIdsFromDOM());
+  renderCurrentCards();
 });
 
 elements.deleteBtn?.addEventListener("click", async () => {
@@ -203,16 +211,21 @@ function toggleIgnoreAll() {
     }
   });
 
-  saveCurrentState(getOwnedIdsFromDOM());
+  saveCurrentState();
 }
 
 elements.ignoreAllBtn?.addEventListener("click", toggleIgnoreAll);
 
 elements.cardList.addEventListener("change", (e) => {
   if (e.target.matches("input[data-id]")) {
-    const owned = getOwnedIdsFromDOM();
-    updateProgressAndValue(currentCards, owned);
-    saveCurrentState(owned);
+    const id = e.target.dataset.id;
+    if (e.target.checked) {
+      ownedIds.add(id);
+    } else {
+      ownedIds.delete(id);
+    }
+    updateProgressAndValue(currentCards, ownedIds);
+    saveCurrentState();
   }
 });
 
@@ -225,12 +238,11 @@ elements.refreshBtn?.addEventListener("click", async () => {
   updateFeedback("Refreshing card data...");
 
   currentCards = await getCardsByArtist(currentArtist);
-  const owned = getOwnedIdsFromDOM();
 
-  await saveCurrentState(owned);
+  await saveCurrentState();
 
-  renderCurrentCards(owned);
-  updateProgressAndValue(currentCards, owned);
+  renderCurrentCards();
+  updateProgressAndValue(currentCards, ownedIds);
   updateFeedback("Collection refreshed.");
 });
 
@@ -238,7 +250,7 @@ createSearchControls(elements.searchControls, {
   artist: getSelectedArtist,
   onSearchComplete: ({ cards }) => {
     lastSearchedCards = cards;
-    renderCurrentCards(getOwnedIdsFromDOM());
+    renderCurrentCards();
   },
 });
 

@@ -7,6 +7,7 @@ import {
   sortOptions,
   getMarketPrice,
 } from "./utils.js";
+import { clearRecentCards } from "./cards.js";
 
 export function getUIElements() {
   return {
@@ -60,22 +61,30 @@ export function clearCollectionDisplay(elements) {
 }
 
 export function updateProgressAndValue(cards, ownedIds) {
-  updateProgress(ownedIds.length, cards.length);
+  updateProgress(ownedIds.size, cards.length);
   updateValueDisplay(calculateOwnedValue(cards, ownedIds));
-}
-
-export function getOwnedIdsFromDOM() {
-  return [...document.querySelectorAll("input[data-id]:checked")].map(
-    (cb) => cb.dataset.id
-  );
 }
 
 function renderRecentCards(cards, ownedIds, ignoredIds, container, siteMap) {
   if (cards.length === 0) return;
 
+  const headerRow = document.createElement("div");
+  headerRow.className = "row";
+
   const header = document.createElement("h4");
   header.textContent = "Recently Searched";
-  container.appendChild(header);
+  header.style.marginRight = "auto";
+
+  const clearBtn = document.createElement("button");
+  clearBtn.textContent = "Clear";
+  clearBtn.className = "button small-button space-bottom";
+  clearBtn.addEventListener("click", () => {
+    clearRecentCards();
+  });
+
+  headerRow.appendChild(header);
+  headerRow.appendChild(clearBtn);
+  container.appendChild(headerRow);
 
   cards.forEach((card) =>
     renderCardItem(card, ownedIds, ignoredIds, container, siteMap)
@@ -162,7 +171,10 @@ export function renderCardList({
     }`;
   }
 
-  const remaining = cards.filter((c) => !lastSearchedCards.includes(c));
+  // don't show recently searched cards in list
+  const recentIds = new Set(lastSearchedCards.map((c) => c.id));
+  const remaining = cards.filter((c) => !recentIds.has(c.id));
+
   renderRecentCards(
     lastSearchedCards,
     ownedIds,
@@ -187,7 +199,7 @@ export function renderCardList({
 }
 
 function renderCardItem(card, ownedIds, ignoredIds, container, siteMap) {
-  const owned = ownedIds.includes(card.id);
+  const owned = ownedIds.has(card.id);
   const ignored = ignoredIds.has(card.id);
 
   const li = document.createElement("li");

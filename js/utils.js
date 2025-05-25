@@ -14,7 +14,7 @@ export function groupBy(array, fn) {
 
 export function calculateOwnedValue(cards, ownedIds) {
   return cards.reduce((sum, card) => {
-    if (!ownedIds.includes(card.id)) return sum;
+    if (!ownedIds.has(card.id)) return sum;
     return sum + getMarketPrice(card);
   }, 0);
 }
