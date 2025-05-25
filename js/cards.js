@@ -200,17 +200,8 @@ function toggleIgnoreAll() {
   const toggle = ![...all].every((cb) => cb.checked);
 
   all.forEach((cb) => {
-    cb.checked = toggle;
     const id = cb.dataset.ignoreId;
-    const li = cb.closest("li");
-
-    if (toggle) {
-      ignoredIds.add(id);
-      if (li) li.style.opacity = "0.5";
-    } else {
-      ignoredIds.delete(id);
-      if (li) li.style.opacity = "1";
-    }
+    setCardIgnoredState(id, toggle);
   });
 
   saveCurrentState();
@@ -218,15 +209,38 @@ function toggleIgnoreAll() {
 
 elements.ignoreAllBtn?.addEventListener("click", toggleIgnoreAll);
 
+function setCardIgnoredState(id, isIgnored) {
+  const cb = elements.cardList.querySelector(`input[data-ignore-id="${id}"]`);
+  const li = cb?.closest("li");
+
+  if (isIgnored) {
+    ignoredIds.add(id);
+    if (cb) cb.checked = true;
+    if (li) li.style.opacity = "0.5";
+  } else {
+    ignoredIds.delete(id);
+    if (cb) cb.checked = false;
+    if (li) li.style.opacity = "1";
+  }
+}
+
 elements.cardList.addEventListener("change", (e) => {
-  if (e.target.matches("input[data-id]")) {
-    const id = e.target.dataset.id;
-    if (e.target.checked) {
+  const { target } = e;
+
+  if (target.matches("input[data-id]")) {
+    const id = target.dataset.id;
+    if (target.checked) {
       ownedIds.add(id);
     } else {
       ownedIds.delete(id);
     }
     updateProgressAndValue(currentCards, ownedIds);
+    saveCurrentState();
+  }
+
+  if (target.matches("input[data-ignore-id]")) {
+    const id = target.dataset.ignoreId;
+    setCardIgnoredState(id, target.checked);
     saveCurrentState();
   }
 });

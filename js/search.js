@@ -50,8 +50,14 @@ export async function search({ artist, siteKey, maxTabs = 10, cards = null }) {
   const fresh = unownedCards.filter(
     (c) => !previouslySearched[artist].has(c.id)
   );
-  const pool = fresh.length > 0 ? fresh : unownedCards;
-  if (fresh.length === 0) previouslySearched[artist].clear();
+
+  let pool;
+  if (fresh.length === 0) {
+    previouslySearched[artist].clear();
+    pool = unownedCards.slice();
+  } else {
+    pool = fresh;
+  }
 
   const shuffled = pool.sort(() => Math.random() - 0.5);
   const tabsToOpen = shuffled.slice(0, maxTabs);
