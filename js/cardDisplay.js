@@ -221,7 +221,7 @@ function renderCardItem(card, ownedIds, ignoredIds, container, siteMap) {
   if (ignored) ignoreBox.checked = true;
 
   const img = document.createElement("img");
-  img.src = card.images.small;
+  img.src = card.images?.small || card.images?.large;
   img.width = 60;
   img.height = 84;
   img.className = "zoomable";

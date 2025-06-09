@@ -1,3 +1,5 @@
+import { sites } from "./sites.js";
+
 const STORAGE_KEYS = {
   collections: "collections",
   apiKey: "apiKey",
@@ -18,11 +20,15 @@ export function loadSearchSites() {
   return new Promise((resolve) => {
     chrome.storage.local.get(STORAGE_KEYS.searchSites, (data) => {
       const saved = data[STORAGE_KEYS.searchSites];
-      resolve(
-        saved && typeof saved === "object"
-          ? saved
-          : { ebay: "https://www.ebay.ca/sch/i.html?_nkw=" }
-      );
+
+      if (saved && typeof saved === "object") {
+        resolve(saved);
+      } else {
+        const fallback = Object.fromEntries(
+          sites.map(({ name, url }) => [name, url])
+        );
+        resolve(fallback);
+      }
     });
   });
 }

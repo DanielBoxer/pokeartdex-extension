@@ -1,0 +1,28 @@
+{
+    "manifest_version": 3,
+    "name": "PokeArtDex Stock Addon",
+    "version": "1.0.0",
+    "description": "",
+    "permissions": [
+        "scripting"
+    ],
+    "host_permissions": [
+        "https://facetofacegames.com/*",
+        "https://store.401games.ca/*"
+    ],
+    "background": {
+        "scripts": [
+            "background.js"
+        ],
+        "type": "module"
+    },
+    "icons": {
+        "512": "icon.svg"
+    },
+    "browser_specific_settings": {
+        "gecko": {
+            "id": "{584ef28a-3339-460d-b62e-9f5d77130bda}",
+            "strict_min_version": "109.0"
+        }
+    }
+}
