@@ -15,6 +15,9 @@ jobs:
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
+        # needed for finding tag
+        with:
+          fetch-depth: 0
 
       - name: Copy icon to sub folder
         run: cp icons/icon.svg ${{ env.SUB_FOLDER }}
@@ -23,11 +26,11 @@ jobs:
         run: zip -r ${{ env.PACKAGE_NAME }}.zip ${{ env.SUB_FOLDER }}
 
       - name: Get latest tag
-        id: previous_tag
+        id: latest_tag
         uses: "WyriHaximus/github-action-get-previous-tag@v1"
 
       - name: Upload addon to release
         uses: softprops/action-gh-release@v2
         with:
-          tag_name: ${{ steps.previous_tag.outputs.tag }}
+          tag_name: ${{ steps.latest_tag.outputs.tag }}
           files: "${{ env.PACKAGE_NAME }}.zip"
