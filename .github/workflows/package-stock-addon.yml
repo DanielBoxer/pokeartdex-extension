@@ -4,7 +4,7 @@ on: workflow_dispatch
 
 env:
   PACKAGE_NAME: "PokeArtDex-Stock-Addon"
-  SUB_FOLDER: "pokeartdex-stock-addon/"
+  ADDON_FOLDER: "pokeartdex-stock-addon/"
 
 jobs:
   upload-stock-addon:
@@ -20,10 +20,12 @@ jobs:
           fetch-depth: 0
 
       - name: Copy icon to sub folder
-        run: cp icons/icon.svg ${{ env.SUB_FOLDER }}
+        run: cp icons/icon.svg ${{ env.ADDON_FOLDER }}
 
-      - name: Zip folder
-        run: zip -r ${{ env.PACKAGE_NAME }}.zip ${{ env.SUB_FOLDER }}
+      - name: Zip files in folder
+        run: |
+          cd ${{ env.ADDON_FOLDER }}
+          zip -r ../${{ env.PACKAGE_NAME }}.zip ./*
 
       - name: Get latest tag
         id: latest_tag
