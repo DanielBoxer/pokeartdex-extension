@@ -1,8 +1,8 @@
 {
     "manifest_version": 3,
     "name": "PokeArtDex Stock Addon",
-    "version": "1.0.0",
-    "description": "",
+    "version": "1.0.1",
+    "description": "Add-on to the PokeArtDex extension that adds a Search In Stock button for supported sites. This lets you search for in stock Pokemon cards by artist.",
     "permissions": [
         "scripting"
     ],
